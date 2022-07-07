@@ -95,6 +95,7 @@ B = sparse([new_edges(:,1);new_edges(:,2)],[1:ne,1:ne]',[-ones(ne,1);ones(ne,1)]
 % From now on, nv is the number of nodes AFTER combining fixed ends
 nv = nv - nf + 1;
 
+
 %------------------------%
 % Lengths and directions %
 %------------------------%
@@ -151,9 +152,6 @@ for i=1:ne
 end
 
 gamma = [ k.*s , k.*(s-1) ];
-
-clear dx edges fixed head new_edges nf node_degree node_unique nodes tail two u i
-showvars
 
 T = @build_mat;
 
@@ -316,12 +314,12 @@ for u=2:nv
 end
 end % build_mat function
 
-function ci = coeff_index(ab,j,i)
+function ci = coeff_index(ab,d,i)
 % Get the index of the coefficient
 % ab = 1 for A, 2 for B
 % d is dimension (in 1:d)
 % i is string number
-ci = ab+2*(j-1)+2*d*(i-1);
+ci = ab+2*(d-1)+2*d*(i-1);
 end % coeff_index function
 
 end % main general_web function
