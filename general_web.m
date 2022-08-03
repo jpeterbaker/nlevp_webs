@@ -26,14 +26,17 @@ function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
 % s(i)>1 is the stretch factor of edge i (when web is at rest)
 %     (default 2)
 %
-% c(i) is the viscous damping coefficient for string i
+% c(i,1) is the viscous damping coefficient for string i in longitudinal direction
+% c(i,2) is the viscous damping coefficient for string i in transverse directions
+%     If c is a scalar, it is interpreted as the transverse damping for all strings
+%     and longitudinal damping is zero.
 %     (default 0)
 %
 % OUTPUTS
 % 
 % T is a function handle that accepts a scalar and returns a square matrix
 % of dimension (2*d*ne) x (2*d*ne)
-%     If T(omega) is singular, then omega/(2*pi) is a natural frequency of the web
+%     If T(lambda) is singular, then lambda/(2*pi) is a mode of the web
 %     The corresponding singular vector gives coefficients of mode shape
 %     The mode shape is described as a function X(x) for each string
 %     Y(x) is X(x) transformed to a coordinate system parallel to the string
@@ -56,10 +59,9 @@ function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
 %     This is needed for understanding mode shapes
 %     TV(:,i,j) is the direction of "dimension i" for string j
 %
-% gamma is an ne x d array of eigenvalues of the wave operator
+% gamma is an ne x 2 array of eigenvalues of the wave operator
 %     gamma(i,1) is the eigenvalue for the longitudinal component of string i
-%     gamma(i,j) for j=2..d is the eigenvalue for all transverse directions of string i
-%          The same value is repeated d-1 times
+%     gamma(i,2) for is the eigenvalue for all transverse directions of string i
 
 [ne,two] = size(edges);
 if two~=2
@@ -133,15 +135,19 @@ end
 if numel(s) == 1
     s = s*ones(ne,1);
 end
+
 if numel(c) == 1
-    c = c*ones(ne,1);
+    c = [zeros(ne,1) c*ones(ne,1)];
+end
+
+if ~all(size(c) == [ne,2])
+    error('damping c should be scalar or ne x 2');
 end
 
 L = L(:);
 rho = rho(:);
 k = k(:);
 s = s(:);
-c = c(:);
 
 TV = zeros(d,d,ne);
 for i=1:ne
@@ -152,14 +158,17 @@ end
 
 gamma = [ k.*s , k.*(s-1) ];
 
-clear dx edges fixed head new_edges nf node_degree node_unique nodes tail two u i
-showvars
-
-T = @build_mat;
+% build_mat was written for undamped problems and real frequencies
+% Multiplying inputs by -1i changes the problem to the more standard convention
+% where undamped eigenvalues are on the imaginary axis
+% and damped eigenvalues are in the complex left half-plane.
+S = @build_mat;
+T = @(lambda) S(-1i*lambda);
 
 function M = build_mat(omega)
-% entry i,j is omega*L(i)*sqrt(rho(i)/gamma(i,j))
-pq = bsxfun(@rdivide,L.*sqrt(omega^2*rho+omega*c),sqrt(gamma));
+g = bsxfun(@minus,omega^2*rho,1i*omega*c);
+G = bsqrt(g);
+pq = bsxfun(@times,L,G) ./ sqrt(gamma);
 p = sin(pq);
 q = cos(pq);
 
@@ -172,9 +181,9 @@ row0 = 1;
 % Next d*(2*ne-F-nv+1) rows are node continuity conditions
 % Last d*(nv-1) rows are force balancing conditions
 
-%%%%%%%%%%%%%%%%%%%%
+%------------------%
 % Frame conditions %
-%%%%%%%%%%%%%%%%%%%%
+%------------------%
 Fi = find(B(1,:));
 F = numel(Fi);
 for i = Fi
@@ -202,9 +211,9 @@ for i = Fi
     row0 = row0 + d;
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%----------------------------%
 % Node continuity conditions %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%----------------------------%
 % for each non-frame node u
 %     for all but the first connected edge
 %         enter continuity condition: this edge and first edge agree
@@ -266,9 +275,9 @@ for u=2:nv
     end
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-------------------------------%
 % Node force balance conditions %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-------------------------------%
 % Node 1 is the frame, but forces balance at all other nodes
 % for each non-frame node u
 %     for all connected edges
@@ -293,16 +302,15 @@ for u=2:nv
     for i=Nu(1:end)
         w = B(u,i);
         % This term will be used repeatedly
-        G = omega^2*rho(i) - 1i*omega*c(i);
         if w == -1
-            Lyip(1,1:2) = [ sqrt(G*gamma(i,1)) , 0 ];
+            Lyip(1,1:2) = [ sqrt(G(i)*gamma(i,1)) , 0 ];
             for j=2:d
-                Lyip(j,2*j-1:2*j) = [ sqrt(G*gamma(i,2)) , 0 ];
+                Lyip(j,2*j-1:2*j) = [ sqrt(G(i)*gamma(i,2)) , 0 ];
             end
         else
-            Lyip(1,1:2) = sqrt(G*gamma(i,1))*[q(i,1),-p(i,1)];
+            Lyip(1,1:2) = sqrt(G(i)*gamma(i,1))*[q(i,1),-p(i,1)];
             for j=2:d
-                Lyip(j,2*j-1:2*j) = sqrt(G*gamma(i,2))*[q(i,2),-p(i,2)];
+                Lyip(j,2*j-1:2*j) = sqrt(G(i)*gamma(i,2))*[q(i,2),-p(i,2)];
             end
         end
         Hxip = TV(:,:,i)*Lyip;

@@ -67,7 +67,7 @@ if nargin<3 || isempty(d)
     d = 2;
 end
 
-[nodes,edges] = build_regweb(spokes,rings);
+[nodes,edges] = regweb_graph(spokes,rings);
 
 % If a third dimension is requested, put web in z=0 plane
 if d == 3

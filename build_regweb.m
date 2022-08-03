@@ -1,5 +1,5 @@
-function [nodes,edges] = regweb(spokes,rings,d)
-%function [nodes,edges] = regweb(spokes,rings)
+function [nodes,edges] = regweb_graph(spokes,rings,d)
+%function [nodes,edges] = regweb_graph(spokes,rings,d)
 %
 % Generate the node positions and edge connections in a
 % highly regular prototypical spider web
@@ -23,7 +23,7 @@ function [nodes,edges] = regweb(spokes,rings,d)
 %     edges(i,:) contains the indices of the two nodes connected by string i
 %     ne is the number of edges
 %
-if nargin<1 || isempty(d)
+if nargin<3 || isempty(d)
     d=2;
 end
 
