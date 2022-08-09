@@ -79,18 +79,8 @@ if numel(c) == 1
     c = c*ones(ne,1);
 end
 
-L = zeros(ne,1);
-vs = zeros(d,ne);
-for i=1:ne
-	tail = nodes(edges(i,1),:);
-	head = nodes(edges(i,2),:);
-	dx = head-tail;
-	L(i) = norm(dx);
-    if L(i) == 0
-        error('Zero-length string not allowed')
-    end
-	vs(:,i) = dx/L(i);
-end
+[~,~,L,vs] = incidence_vectors(nodes,edges);
+
 % All of the tail locations
 R0 = nodes(edges(:,1),:)';
 

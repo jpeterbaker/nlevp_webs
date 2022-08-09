@@ -32,6 +32,5 @@ end
 title(['Mode shape of $\omega$=',sprintf('%g',omega)],'interpreter','latex');
 
 axis off
-set(fig,'position',[0,0,500,500]);
 
 

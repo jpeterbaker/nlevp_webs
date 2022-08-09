@@ -1,10 +1,10 @@
 function [B,new_edges,vs,L] = incidence_vectors(nodes,edges)
-%function B = incidence_vectors(nodes,edges)
+%function [B,new_edges,vs,L] = incidence_vectors(nodes,edges)
 %
 % Build the "incidence matrix" of the network
-% and separate the direction and length of the strings.
+% and calculate the direction and length of each string.
+% Nodes with degree 1 are presumed to be fixed anchors.
 % In the incidence matrix, the fixed string ends are consolidated into a single node.
-% The fixed ends are presumed to be the nodes with degree 1.
 %
 % INPUTS
 %
