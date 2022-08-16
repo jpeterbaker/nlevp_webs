@@ -1,14 +1,14 @@
-function R = mode_curves(omega,v,TV,gamma,nodes,edges,rho,c,scale,N)
-%function R = mode_curves(omega,v,TV,gamma,nodes,edges,rho,c,scale,N)
+function R = mode_curves(lambda,v,TV,gamma,nodes,edges,rho,c,scale,N)
+%function R = mode_curves(lambda,v,TV,gamma,nodes,edges,rho,c,scale,N)
 %
 % Get string vibration positions for a particular dynamic mode in d dimensions
 %
 % INPUTS
 %
-% omega is a natural frequency of the NLEVP
+% lambda is an eigenvalue of the NLEVP
 %
-% v is an eigenvector associated with omega
-%     i.e. a singular vector of T(omega)
+% v is an eigenvector associated with lambda
+%     i.e. a singular vector of T(lambda)
 %
 % TV is the array of basis matrices produced by the NLEVP generation functions
 %
@@ -54,7 +54,7 @@ if nargin < 10 || isempty(N)
     N = 30;
 end
 
-if mmax(abs(imag(v))) > 1e-6
+if max(abs(imag(v(:)))) > 1e-6
     error('v should be a real vector. Find a real basis for span of eigenvalue''s null space.')
 end
 
@@ -79,7 +79,7 @@ if numel(c) == 1
     c = c*ones(ne,1);
 end
 
-[~,~,L,vs] = incidence_vectors(nodes,edges);
+[~,~,vs,L] = incidence_vectors(nodes,edges);
 
 % All of the tail locations
 R0 = nodes(edges(:,1),:)';
@@ -87,7 +87,7 @@ R0 = nodes(edges(:,1),:)';
 R = zeros(d,N,ne);
 
 % This term gets multiplied by eta and then becomes input to sin or cos
-PQ = sqrt(bsxfun(@rdivide,bsxfun(@plus,omega^2*rho,omega*c),gamma));
+PQ = sqrt(bsxfun(@rdivide,-bsxfun(@plus,lambda^2*rho,lambda*c),gamma))
 for i=1:ne
     eta = linspace(0,L(i),N);
     % pq for this string in all d dimensions

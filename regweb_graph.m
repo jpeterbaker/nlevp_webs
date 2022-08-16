@@ -26,6 +26,9 @@ function [nodes,edges] = regweb_graph(spokes,rings,d)
 if nargin<3 || isempty(d)
     d=2;
 end
+if d==1
+    error('d must be >= 2')
+end
 
 % Angles at which to place spokes
 theta = linspace(0,2*pi,spokes+1);
@@ -52,7 +55,5 @@ edges(spokes+1:nv-1,2) = 2+spokes:nv;
 edges(nv:2*nv-spokes-2,1) = 2:nv-spokes;
 edges(nv:2*nv-spokes-2,2) = (3:nv-spokes+1)-spokes*(mod(2:nv-spokes,spokes)==1);
 
-if d==3
-    nodes(1,3) = 0;
-end
+nodes(1,d) = 0;
 

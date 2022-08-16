@@ -26,10 +26,21 @@ function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
 % s(i)>1 is the stretch factor of edge i (when web is at rest)
 %     (default 2)
 %
-% c(i,1) is the viscous damping coefficient for string i in longitudinal direction
-% c(i,2) is the viscous damping coefficient for string i in transverse directions
-%     If c is a scalar, it is interpreted as the transverse damping for all strings
-%     and longitudinal damping is zero.
+% c can have several forms
+%     1) c is ne x 2
+%         c(i,1) is the viscous damping coefficient for string i in longitudinal direction
+%         c(i,2) is the viscous damping coefficient for string i in all transverse directions
+%     2) c is an ne-vector
+%         specifies the damping for each string, but the same in all directions
+%         same as providing repamt(c(:),1,2)
+%     3) c is a 2-vector
+%         specifies damping separately for the directions but the same for all strings
+%         same as providing repamt(c(:)',ne,1)
+%     4) c is a scalar
+%         specifies the same damping for all strings in all directions
+%         same as providing repamt(c,ne,2)
+%     If c is a 2-vector and ne==2, then (2) is used if c is a column vector,
+%     and (3) is used if c is a row vector
 %     (default 0)
 %
 % OUTPUTS
@@ -61,7 +72,7 @@ function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
 %
 % gamma is an ne x 2 array of eigenvalues of the wave operator
 %     gamma(i,1) is the eigenvalue for the longitudinal component of string i
-%     gamma(i,2) for is the eigenvalue for all transverse directions of string i
+%     gamma(i,2) for j=2 is the eigenvalue for all transverse directions of string i
 
 [ne,two] = size(edges);
 if two~=2
@@ -113,16 +124,16 @@ for i=1:ne
 	vs(:,i) = dx/L(i);
 end
 
-if nargin < 4 || isempty(rho)
+if nargin < 3 || isempty(rho)
     rho = 1;
 end
-if nargin < 5 || isempty(k)
+if nargin < 4 || isempty(k)
     k = 1;
 end
-if nargin < 6 || isempty(s)
+if nargin < 5 || isempty(s)
     s = 2;
 end
-if nargin < 7 || isempty(c)
+if nargin < 6 || isempty(c)
     c = 0;
 end
 
@@ -137,14 +148,27 @@ if numel(s) == 1
 end
 
 if numel(c) == 1
-    c = [zeros(ne,1) c*ones(ne,1)];
+    % Case 4
+    % Nothing to do
+elseif numel(c) == 2
+    if ne ~= 2
+        % Case 2
+        % Just make sure c is a row vector
+        c = c(:).';
+    end
+    % If ne == 2, cases 2 and 3 are both handled correctly by bsxfun in build_mat
+elseif numel(c) == ne
+    % Case 2
+    % Just make sure c is a column vector
+    c = c(:);
+elseif all(size(c) == [ne,2])
+    % Case 1
+    % Nothing to do
+else
+    % Size of c not understood
+    error(sprintf('Damping c should be ne x 2 (to specify longitudinal and transverse damping for each string),\nor 1 x 2 (to specify longitudinal and transverse damping for all strings)\nor scalar (to specify same damping for all strings and directions)'));
 end
 
-if ~all(size(c) == [ne,2])
-    error('damping c should be scalar or ne x 2');
-end
-
-L = L(:);
 rho = rho(:);
 k = k(:);
 s = s(:);
@@ -158,16 +182,11 @@ end
 
 gamma = [ k.*s , k.*(s-1) ];
 
-% build_mat was written for undamped problems and real frequencies
-% Multiplying inputs by -1i changes the problem to the more standard convention
-% where undamped eigenvalues are on the imaginary axis
-% and damped eigenvalues are in the complex left half-plane.
-S = @build_mat;
-T = @(lambda) S(-1i*lambda);
+T = @build_mat;
 
-function M = build_mat(omega)
-g = bsxfun(@minus,omega^2*rho,1i*omega*c);
-G = bsqrt(g);
+function M = build_mat(lambda)
+g = -bsxfun( @plus , lambda^2*rho , lambda*c );
+G = sqrt(g);
 pq = bsxfun(@times,L,G) ./ sqrt(gamma);
 p = sin(pq);
 q = cos(pq);
@@ -286,7 +305,7 @@ end
 % but, for each node
 %     only d rows are used (representing sum of all forces in each of d dimensions)
 %     sin and cos (p and q) terms are modified (due to derivative)
-%     a factor of sqrt( ( omega^2*rho + omega*c )*gamma ) appears
+%     a factor of sqrt( ( lambda^2*rho + lambda*c )*gamma ) appears
 %         (due to derivative and multiplication by gamma matrix)
 %
 % The forces are H*dX but it's more convenient to write that as
@@ -332,5 +351,5 @@ function ci = coeff_index(ab,j,i)
 ci = ab+2*(j-1)+2*d*(i-1);
 end % coeff_index function
 
-end % main general_web function
+end % main webnlevp function
 
