@@ -1,6 +1,13 @@
 # Nonlinear Eigenvalue Problems for vibrating webs
 
-<div style="float:right;margin:10px 10px 10px 30px;font-size:12px;position:relative">
+<!--
+Security restrictions on GitHub required me to use some some creativity
+to get this poem formatted as I wanted in the preview.
+-->
+<div align="right">
+<table>
+<tr>
+<td>
 The spider as an artist
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Has never been employed
@@ -9,9 +16,13 @@ Though his surpassing merit
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Is freely certified
 <br>
-<i style="right:0px;position:absolute">Emily Dickinson</i>
-<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>Emily Dickinson</i>
+</td>
+</tr>
+<table>
 </div>
+
+<div align="left">
 
 The natural frequencies and mode shapes of multibody structures can be found
 by collecting the connection constraints into a nonlinear eigenvalue problem (NLEVP).
@@ -45,4 +56,6 @@ In order to draw the mode shapes of the other systems, you will need to calculat
 ## Requirements
 
 This project runs in base MatLab without any additional packages needed.
-It was primarily tested with version 2020a.
+It was developed with versions 2020a and 2021b
+but is expected to work in much older versions.
+</div>
