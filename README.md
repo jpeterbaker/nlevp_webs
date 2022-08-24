@@ -8,15 +8,12 @@ to get this poem formatted as I wanted in the preview.
 <table>
 <tr>
 <td>
-The spider as an artist
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Has never been employed
-<br>
+<pre>The spider as an artist
+    Has never been employed
 Though his surpassing merit
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Is freely certified
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>Emily Dickinson</i>
+    Is freely certified
+            <i>Emily Dickinson</i>
+</pre>
 </td>
 </tr>
 <table>
