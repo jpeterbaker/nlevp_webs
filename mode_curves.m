@@ -87,7 +87,7 @@ R0 = nodes(edges(:,1),:)';
 R = zeros(d,N,ne);
 
 % This term gets multiplied by eta and then becomes input to sin or cos
-PQ = sqrt(bsxfun(@rdivide,-bsxfun(@plus,lambda^2*rho,lambda*c),gamma))
+PQ = sqrt(bsxfun(@rdivide,-bsxfun(@plus,lambda^2*rho,lambda*c),gamma));
 for i=1:ne
     eta = linspace(0,L(i),N);
     % pq for this string in all d dimensions

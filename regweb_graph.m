@@ -17,11 +17,11 @@ function [nodes,edges] = regweb_graph(spokes,rings,d)
 % 
 % nodes is an nv x 2 matrix with the coordinates of nodes
 %     nodes(i,:) is the location of node i
-%     nv is the number of nodes
+%     nv is the number of nodes: spokes*(rings+1)+1
 % 
 % edges is an ne x 2 matrix with the indices of connected nodes
 %     edges(i,:) contains the indices of the two nodes connected by string i
-%     ne is the number of edges
+%     ne is the number of edges: spokes*(2*rings+1)
 %
 if nargin<3 || isempty(d)
     d=2;
