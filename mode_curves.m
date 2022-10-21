@@ -54,6 +54,31 @@ if nargin < 10 || isempty(N)
     N = 30;
 end
 
+rho = rho(:);
+ne = size(v,2);
+
+if numel(c) == 1
+    % Case 4
+    % Nothing to do
+elseif numel(c) == 2
+    if ne ~= 2
+        % Case 2
+        % Just make sure c is a row vector
+        c = c(:).';
+    end
+    % If ne == 2, cases 2 and 3 are both handled correctly by bsxfun in build_mat
+elseif numel(c) == ne
+    % Case 2
+    % Just make sure c is a column vector
+    c = c(:);
+elseif all(size(c) == [ne,2])
+    % Case 1
+    % Nothing to do
+else
+    % Size of c not understood
+    error(sprintf('Damping c should be ne x 2 (to specify longitudinal and transverse damping for each string),\nor 1 x 2 (to specify longitudinal and transverse damping for all strings)\nor scalar (to specify same damping for all strings and directions)'));
+end
+
 if max(abs(imag(v(:)))) > 1e-6
     error('v should be a real vector. Find a real basis for span of eigenvalue''s null space.')
 end

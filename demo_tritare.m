@@ -1,5 +1,5 @@
 
-% Demonstrates how to produce and visualize a string NLEVP
+% This script demonstrates how to produce and visualize a string NLEVP
 
 %-------------------------------------%
 % Index of the mode to display (1-24) %
@@ -37,5 +37,4 @@ end
 title(['Mode shape of $\lambda$=',sprintf('%gi',lambda/1i)],'interpreter','latex');
 
 axis off
-
 

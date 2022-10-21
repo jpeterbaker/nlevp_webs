@@ -9,7 +9,7 @@ function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
 %     nodes(i,:) is the location of node i
 %     nv is the number of nodes
 %     d is the number of spatial dimensions (usually 2 or 3)
-% 
+%
 % edges is an ne x 2 matrix with the indices of connected nodes
 %     edges(i,:) contains the indices of the two nodes connected by string i
 %     ne is the number of edges
@@ -44,7 +44,7 @@ function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
 %     (default 0)
 %
 % OUTPUTS
-% 
+%
 % T is a function handle that accepts a scalar and returns a square matrix
 % of dimension (2*d*ne) x (2*d*ne)
 %     If T(lambda) is singular, then lambda/(2*pi) is a mode of the web
@@ -84,45 +84,56 @@ if d>3
     warning('nodes should usually be (nv x 2) or (nv x 3)')
 end
 
-%--------------------------------%
-% Combine fixed ends into node 1 %
-%--------------------------------%
-[node_degree,node_unique] = groupcounts(edges(:));
-fixed = node_degree==1;
-nv = numel(node_unique);
+% E is the signed node-edge incidence matrix
+% new_edges is like edges but with fixed nodes combined into node 1
+% column i of vs is the unit-vector orientation of edge i
+% L is the length of edge i
+[E,new_edges,vs,L] = incidence_vectors(nodes,edges);
 
-nf = sum(fixed);
+% The process below has been replaced by incidence_vectors.m
+if 0
+    %--------------------------------%
+    % Combine fixed ends into node 1 %
+    %--------------------------------%
+    [node_degree,node_unique] = groupcounts(edges(:));
+    fixed = node_degree==1;
+    nv = numel(node_unique);
 
-u = zeros(nv,1);
-u( fixed) = 1;
-u(~fixed) = 2:nv-nf+1;
+    nf = sum(fixed);
 
-new_edges = zeros(ne,2);
-for i=1:nv
-    new_edges(edges==node_unique(i)) = u(i);
+    u = zeros(nv,1);
+    u( fixed) = 1;
+    u(~fixed) = 2:nv-nf+1;
+
+    new_edges = zeros(ne,2);
+    for i=1:nv
+        new_edges(edges==node_unique(i)) = u(i);
+    end
+
+
+    % Fill a sparse matrix all at once with lists of indices and entries
+    E = sparse([new_edges(:,1);new_edges(:,2)],[1:ne,1:ne]',[-ones(ne,1);ones(ne,1)]);
+
+    %------------------------%
+    % Lengths and directions %
+    %------------------------%
+    L = zeros(ne,1);
+    vs = zeros(d,ne);
+    for i=1:ne
+        tail = nodes(edges(i,1),:);
+        head = nodes(edges(i,2),:);
+        dx = head-tail;
+        L(i) = norm(dx);
+        if L(i) == 0
+            error('Zero-length string not allowed')
+        end
+        vs(:,i) = dx/L(i);
+    end
+    %nv = nv - nf + 1;
 end
-
-% Fill a sparse matrix all at once with lists of indices and entries
-B = sparse([new_edges(:,1);new_edges(:,2)],[1:ne,1:ne]',[-ones(ne,1);ones(ne,1)]);
 
 % From now on, nv is the number of nodes AFTER combining fixed ends
-nv = nv - nf + 1;
-
-%------------------------%
-% Lengths and directions %
-%------------------------%
-L = zeros(ne,1);
-vs = zeros(d,ne);
-for i=1:ne
-	tail = nodes(edges(i,1),:);
-	head = nodes(edges(i,2),:);
-	dx = head-tail;
-	L(i) = norm(dx);
-    if L(i) == 0
-        error('Zero-length string not allowed')
-    end
-	vs(:,i) = dx/L(i);
-end
+nv = size(E,1);
 
 if nargin < 3 || isempty(rho)
     rho = 1;
@@ -203,13 +214,13 @@ row0 = 1;
 %------------------%
 % Frame conditions %
 %------------------%
-Fi = find(B(1,:));
+Fi = find(E(1,:));
 F = numel(Fi);
 for i = Fi
     % String i is connected to the frame
     % so X and Y are  0 on this end
     % w=-1 if tail is connected to the frame, w=1 for head
-    w = B(1,i);
+    w = E(1,i);
     % First column associated with a coefficient for string i
     col0 = coeff_index(1,1,i);
     if w == -1
@@ -238,20 +249,20 @@ end
 %         enter continuity condition: this edge and first edge agree
 for u=2:nv
     % Edge-neighborhood of node u
-    Nu = find(B(u,:));
+    Nu = find(E(u,:));
     % First neighbor of u
     i1 = Nu(1);
     % Figure out position of string i1 at u
-    w = B(u,i1);
+    w = E(u,i1);
     % yi1 will have the coefficients that would go in the matrix
     % if the string were horizontal.
     % TV(:,:,i1) has the correct transformation to standard coordinates
-    % In other words, Y_i1(u) = yi1 * [A_i1 ; B_i1 ; ...]
+    % In other words, Y_i1(u) = yi1 * [A_(i1,1) ; B_(i1,1) ; ... ; B_(i1,d) ]
     % and X_i1(u) = TV(:,:,i1)*Y_i1;
     yi1 = zeros(d,2*d);
     if w == -1
         % Node is at the tail (x=0), so sin terms are zero and cos terms are 1
-        % If d=2, here's the result:
+        % If d=2, the result is:
         % yi1 = [ 0 , 1 , 0 , 0 ; 0 , 0 , 0 , 1 ];
         for j=1:d
             yi1(j,2*j) = 1;
@@ -259,8 +270,8 @@ for u=2:nv
     else
         % Node is at the head (x=L), so terms are already computed in p and q
         % First eig used for first direction, second eig for all others
-        % If d=2, here's the result:
-        % yi1 = [ p(i1,1) , q(i1,1)] , 1 , 0 , 0 ; 0 , 0 , p(i1,2) , q(i1,2) ];
+        % If d=2, the result is:
+        % yi1 = [ p(i1,1) , q(i1,1) , 0 , 0 ; 0 , 0 , p(i1,2) , q(i1,2) ];
         yi1(1,1:2) = [p(i1,1),q(i1,1)];
         for j=2:d
             yi1(j,2*j-1:2*j) = [p(i1,2),q(i1,2)];
@@ -271,10 +282,10 @@ for u=2:nv
     col0i1 = coeff_index(1,1,i1);
 
     % Construction of yi is just like for yi1
-    % except that, since it is reused, 0 must be written in w=-1 case
+    % except that, since yi variable is reused, 0 must be written in w = -1 case
     yi = zeros(d,2*d);
     for i=Nu(2:end)
-        w = B(u,i);
+        w = E(u,i);
         if w == -1
             for j=1:d
                 yi(j,2*j-1:2*j) = [0,1];
@@ -314,12 +325,12 @@ end
 % and then pre-multiplies by TV
 for u=2:nv
     % Edge-neighborhood of node u
-    Nu = find(B(u,:));
+    Nu = find(E(u,:));
 
     % Y_i prime (derivative)
     Lyip = zeros(d,2*d);
     for i=Nu(1:end)
-        w = B(u,i);
+        w = E(u,i);
         % This term will be used repeatedly
         if w == -1
             Lyip(1,1:2) = [ sqrt(G(i)*gamma(i,1)) , 0 ];
@@ -345,11 +356,11 @@ end % build_mat function
 
 function ci = coeff_index(ab,j,i)
 % Get the index of the coefficient
-% ab = 1 for A, 2 for B
-% d is dimension (in 1:d)
+% ab = 1 for A (sin coefficient), 2 for B (cos coefficient)
+% j is dimension (in 1:d)
 % i is string number
 ci = ab+2*(j-1)+2*d*(i-1);
 end % coeff_index function
 
-end % main webnlevp function
+end % general_web function
 
