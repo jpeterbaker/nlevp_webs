@@ -11,7 +11,7 @@ function [T,TV,gamma] = regweb_12_7(d)
 % INPUTS
 %
 % d is the number of spatial dimensions for the web to occupy (2 or 3)
-%     default 2
+%     (default  d=2)
 %
 % OUTPUTS
 % 

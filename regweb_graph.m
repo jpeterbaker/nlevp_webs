@@ -11,7 +11,7 @@ function [nodes,edges] = regweb_graph(spokes,rings,d)
 % rings is the number of concentric polygonal rings in the web
 %
 % d is the number of spatial dimensions for the web to occupy (2 or 3)
-%     default 2
+%     (default  d=2)
 %
 % OUTPUTS
 % 
