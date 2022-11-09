@@ -1,5 +1,5 @@
-function [T,TV,gamma] = regweb_12_7(d)
-%function [T,TV,gamma] = regweb_12_7(d)
+function [T,TV,gamma,nodes,edges] = regweb_12_7(d)
+%function [T,TV,gamma,nodes,edges] = regweb_12_7(d)
 %
 % Represent modal vibrations of a network of elastic strings as a nonlinear eigenvalue problem
 % The network is a "spider web" with 12 spokes and 7 rings
@@ -29,6 +29,6 @@ function [T,TV,gamma] = regweb_12_7(d)
 if nargin<1 || isempty(d)
     d=2;
 end
-[T,TV,gamma] = regweb(12,7,d);
+[T,TV,gamma,nodes,edges] = regweb(12,7,d);
 
 

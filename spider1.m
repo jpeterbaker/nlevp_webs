@@ -27,5 +27,5 @@ if d == 3
     nodes(1,3) = 0;
 end
 
-[T,TV,gamma] = general_web(nodes,edges,d);
+[T,TV,gamma,nodes,edges] = general_web(nodes,edges,d);
 

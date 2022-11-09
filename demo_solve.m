@@ -30,7 +30,7 @@ function ew = demo_solve(num)
 %-------------%
 % Check input %
 %-------------%
-if nargin < 1 || numel(num) ~= 1
+if nargin < 1
     newline = sprintf('\n');
     helpstr = join([
         "Enter a problem number to continue:",
@@ -43,47 +43,111 @@ if nargin < 1 || numel(num) ~= 1
     newline...
     );
     num = input(helpstr,'s');
-    num = str2num(num);
+    num = str2double(num);
 end
+
+%----------------------------%
+% Get selected NLEVP problem %
+% and good predetermined     %
+% solver parameters          %
+%----------------------------%
+
+% Number of quadrature points
+N = 500;
 
 if num == 1
     % The NLEVP function
-    T = tritare();
+    [T,~,~,nodes,edges] = tritare();
 
-    % Center and radius of circular contour
-    c = 3i;
-    r = 2;
-
-    % Number of quadrature points
-    N = 500;
-
-    % Set up evenly-spaced quadrature points on circular contour
-    theta = linspace(0,2*pi,N+1);
-    theta = theta(1:end-1);
-    unit_circle = exp(1i*theta);
-    z = c + r*unit_circle;
-    % Quadrature weights
-    w = 2i*pi*r/N*unit_circle;
+    % Establish extent of elliptical contour
+    xlo = -0.1; xhi = 0.1;
+    ylo =  1.0; yhi = 5.0;
 
     % Number of Hankel moments
     k = 2;
     % Number of probing directions
     p = 7;
-
-    % Use NLEVP solver
-    e = basic_solver(T,z,w,p,k)
-
-    % Plot the contour and eigenvalues
-    figure()
-    hold on
-    plot(real(z),imag(z),'k-')
-    plot(real(e),imag(e),'ko')
-    axis equal
 elseif num == 2
+    [T,~,~,nodes,edges] = regweb_5_4();
+
+    xlo = -0.1; xhi = 0.1;
+    ylo =  1.0; yhi = 5.0;
+
+    k = 1;
+    p = 30;
 elseif num == 3
+    [T,~,~,nodes,edges] = regweb_12_7();
+
+    xlo = -0.1; xhi = 0.1;
+    ylo =  1.0; yhi = 5.0;
+
+    k = 1;
+    p = 30;
 elseif num == 4
+    [T,~,~,nodes,edges] = spider1();
+
+    xlo = -0.1; xhi = 0.1;
+    ylo =  1.0; yhi = 5.0;
+
+    k = 2;
+    p = 56;
 elseif num == 5
+    [T,~,~,nodes,edges] = spider2();
+
+    xlo = -0.1; xhi = 0.1;
+    ylo =  1.0; yhi = 5.0;
+
+    k = 1;
+    p = 56;
 else
     error("Input should be an integer 1-5");
 end
+
+%------------------------------------------------%
+% Set up points on contour and quadrature points %
+%------------------------------------------------%
+theta = linspace(0,2*pi,N+1);
+theta = theta(1:end-1);
+a = (xhi-xlo)/2;
+b = (yhi-ylo)/2;
+c = (xhi+xlo)/2 + 1i*(yhi+ylo)/2;
+% Points on contour
+z  = c + a* cos(theta) + 1i*b*sin(theta);
+% Quadrature weights
+w = 2*pi/N*(a*-sin(theta) + 1i*b*cos(theta));
+
+
+%------------------%
+% Use NLEVP solver %
+%------------------%
+ew = basic_solver(T,z,w,p,k);
+
+%----------------------------------%
+% Plot the contour and eigenvalues %
+%----------------------------------%
+figure()
+subplot(1,2,1)
+hold on
+
+plot(real([z,z(1)]),imag([z,z(1)]),'b-')
+plot(real(ew),imag(ew),'ko')
+axis equal
+title('Eigenvalues and integration contour')
+
+%------------------%
+% Draw the strings %
+%------------------%
+subplot(1,2,2)
+hold on
+
+% Number of edges
+ne = size(edges,1);
+
+for i=1:ne
+	ei = edges(i,:);
+	plot(nodes(ei,1),nodes(ei,2),'k-');
+end
+axis equal
+title('String network at rest')
+
 
