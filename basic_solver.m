@@ -1,5 +1,5 @@
 function e = basic_solver(T,z,w,p,k,tol)
-%function e = basic_solver(T,z,w,p,k)
+%function e = basic_solver(T,z,w,p,k,tol)
 %
 % Basic contour integration solver based on Beyn's algorithm
 %
@@ -31,6 +31,10 @@ function e = basic_solver(T,z,w,p,k,tol)
 %    * p or k is too small
 %    * z and w do not correspond to a good quadrature method
 %    * the contour z passes very close to an eigenvalue (inside or outside)
+%
+
+% by Jonathan Baker
+% jonpbak@vt.edu
 
 if nargin < 5
 	k=1;

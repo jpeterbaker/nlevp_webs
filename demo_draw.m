@@ -10,11 +10,11 @@ j = 3;
 % Produce the matrix function (T),
 %     network description (nodes, edges)
 %     supplemental information for plotting (TV, gamma),
-%     and the first 24 eigenvalues (eigs)
-[T,TV,gamma,nodes,edges,eigs] = tritare();
+%     and the first 24 eigenvalues (ew)
+[T,TV,gamma,nodes,edges,ew] = tritare();
 
 % Select one eigenvalue for study
-lambda = eigs(j);
+lambda = ew(j);
 
 % Get an associated eigenvector v
 [~,~,V] = svd(T(lambda));
