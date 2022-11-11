@@ -53,25 +53,25 @@ end
 %----------------------------%
 
 % Number of quadrature points
-N = 500;
+N = 100;
 
 if num == 1
     % The NLEVP function
     [T,~,~,nodes,edges] = tritare();
 
     % Establish extent of elliptical contour
-    xlo = -0.1; xhi = 0.1;
-    ylo =  1.0; yhi = 5.0;
+    xlo = -0.5; xhi =  0.5;
+    ylo =  1.0; yhi = 10.0;
 
     % Number of Hankel moments
-    k = 2;
+    k = 3;
     % Number of probing directions
-    p = 7;
+    p = 10;
 elseif num == 2
     [T,~,~,nodes,edges] = regweb_5_4();
 
     xlo = -0.1; xhi = 0.1;
-    ylo =  1.0; yhi = 5.0;
+    ylo =  1.0; yhi = 4.6;
 
     k = 1;
     p = 30;
@@ -82,23 +82,23 @@ elseif num == 3
     ylo =  1.0; yhi = 5.0;
 
     k = 1;
-    p = 30;
+    p = 20;
 elseif num == 4
     [T,~,~,nodes,edges] = spider1();
 
-    xlo = -0.1; xhi = 0.1;
-    ylo =  1.0; yhi = 5.0;
+    xlo = -0.005; xhi = 0.005;
+    ylo =  0.001; yhi = 0.0203;
 
-    k = 2;
-    p = 56;
+    k = 1;
+    p = 25;
 elseif num == 5
     [T,~,~,nodes,edges] = spider2();
 
-    xlo = -0.1; xhi = 0.1;
-    ylo =  1.0; yhi = 5.0;
+    xlo = -0.005; xhi = 0.005;
+    ylo =  0.001; yhi = 0.009;
 
     k = 1;
-    p = 56;
+    p = 10;
 else
     error("Input should be an integer 1-5");
 end
@@ -116,7 +116,6 @@ z  = c + a* cos(theta) + 1i*b*sin(theta);
 % Quadrature weights
 w = 2*pi/N*(a*-sin(theta) + 1i*b*cos(theta));
 
-
 %------------------%
 % Use NLEVP solver %
 %------------------%
@@ -125,7 +124,7 @@ ew = basic_solver(T,z,w,p,k);
 %----------------------------------%
 % Plot the contour and eigenvalues %
 %----------------------------------%
-figure()
+figure(10)
 subplot(1,2,1)
 hold on
 

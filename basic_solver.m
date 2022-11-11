@@ -16,8 +16,8 @@ function e = basic_solver(T,z,w,p,k,tol)
 %
 % k is the number of moments to use when constructing the Hankel matrices.
 %     p*k should be no less than the number of eigenvalues in the contour.
-%     More moments tend to be needed if
-%     eigenvalues in the contour have linearly dependent eigenvectors.
+%     More moments tend to be needed if eigenvalues in the contour have linearly
+%     dependent eigenvectors.
 %     (default k = 1)
 %
 % tol is the singular value cutoff for estimating the number of eigenvalues.
@@ -27,10 +27,12 @@ function e = basic_solver(T,z,w,p,k,tol)
 % OUTPUTS
 %
 % e is a vector of approximate eigenvalues of T that lie in the contour defined by z.
-%     e may inaccurate if
-%    * p or k is too small
-%    * z and w do not correspond to a good quadrature method
-%    * the contour z passes very close to an eigenvalue (inside or outside)
+%    e is likely to be inaccurate if
+%       > p or k is too small
+%       > the contour points z and weights w do not correspond to a good quadrature method
+%       > the contour points z are too coarse (with too few points)
+%       > the contour is too large (with points that are far away from each other)
+%       > the contour passes very close to an eigenvalue (inside or outside)
 %
 
 % by Jonathan Baker

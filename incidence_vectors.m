@@ -61,6 +61,9 @@ for i=1:ne
 	head = nodes(edges(i,2),:);
 	dx = head-tail;
 	L(i) = norm(dx);
+    if L(i) == 0
+        error('Zero-length string not allowed')
+    end
 	vs(:,i) = dx/L(i);
 end
 

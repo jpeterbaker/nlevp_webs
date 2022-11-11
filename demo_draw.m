@@ -23,7 +23,7 @@ v = V(:,end);
 % Get string positions during modal vibration
 R = mode_curves(lambda,v,TV,gamma,nodes,edges,[],[],0.2);
 
-figure(1)
+figure(11)
 clf
 hold on
 

@@ -90,48 +90,6 @@ end
 % L is the length of edge i
 [E,new_edges,vs,L] = incidence_vectors(nodes,edges);
 
-% The process below has been replaced by incidence_vectors.m
-if 0
-    %--------------------------------%
-    % Combine fixed ends into node 1 %
-    %--------------------------------%
-    [node_degree,node_unique] = groupcounts(edges(:));
-    fixed = node_degree==1;
-    nv = numel(node_unique);
-
-    nf = sum(fixed);
-
-    u = zeros(nv,1);
-    u( fixed) = 1;
-    u(~fixed) = 2:nv-nf+1;
-
-    new_edges = zeros(ne,2);
-    for i=1:nv
-        new_edges(edges==node_unique(i)) = u(i);
-    end
-
-
-    % Fill a sparse matrix all at once with lists of indices and entries
-    E = sparse([new_edges(:,1);new_edges(:,2)],[1:ne,1:ne]',[-ones(ne,1);ones(ne,1)]);
-
-    %------------------------%
-    % Lengths and directions %
-    %------------------------%
-    L = zeros(ne,1);
-    vs = zeros(d,ne);
-    for i=1:ne
-        tail = nodes(edges(i,1),:);
-        head = nodes(edges(i,2),:);
-        dx = head-tail;
-        L(i) = norm(dx);
-        if L(i) == 0
-            error('Zero-length string not allowed')
-        end
-        vs(:,i) = dx/L(i);
-    end
-    %nv = nv - nf + 1;
-end
-
 % From now on, nv is the number of nodes AFTER combining fixed ends
 nv = size(E,1);
 
