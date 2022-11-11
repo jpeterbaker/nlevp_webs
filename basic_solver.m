@@ -1,5 +1,5 @@
-function e = basic_solver(T,z,w,p,k,tol)
-%function e = basic_solver(T,z,w,p,k,tol)
+function ew = basic_solver(T,z,w,p,k,tol)
+%function ew = basic_solver(T,z,w,p,k,tol)
 %
 % Basic contour integration solver based on Beyn's algorithm
 %
@@ -14,7 +14,7 @@ function e = basic_solver(T,z,w,p,k,tol)
 %
 % p is the number of probing directions to use.
 %
-% k is the number of moments to use when constructing the Hankel matrices.
+% k is the number of moments to include in the Hankel matrices.
 %     p*k should be no less than the number of eigenvalues in the contour.
 %     More moments tend to be needed if eigenvalues in the contour have linearly
 %     dependent eigenvectors.
@@ -26,8 +26,8 @@ function e = basic_solver(T,z,w,p,k,tol)
 %
 % OUTPUTS
 %
-% e is a vector of approximate eigenvalues of T that lie in the contour defined by z.
-%    e is likely to be inaccurate if
+% ew is a vector of approximate eigenvalues of T that lie in the contour defined by z.
+%    ew is likely to be inaccurate if
 %       > p or k is too small
 %       > the contour points z and weights w do not correspond to a good quadrature method
 %       > the contour points z are too coarse (with too few points)
@@ -117,5 +117,5 @@ W0 = W0(:,1:ne);
 
 %B = V0'*A1*W0/S0;
 B = bsxfun(@rdivide,V0'*Hs*W0,S0.');
-e = eig(B);
+ew = eig(B);
 
