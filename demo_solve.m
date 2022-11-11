@@ -67,6 +67,9 @@ if num == 1
     k = 3;
     % Number of probing directions
     p = 10;
+
+    fprintf("\nSolving tritare problem\n")
+    fprintf("This will probably take less than a second\n\n")
 elseif num == 2
     [T,~,~,nodes,edges] = regweb_5_4();
 
@@ -75,6 +78,9 @@ elseif num == 2
 
     k = 1;
     p = 30;
+
+    fprintf("\nSolving 5-spoke 4-ring web problem\n")
+    fprintf("This will probably take less than a second\n\n")
 elseif num == 3
     [T,~,~,nodes,edges] = regweb_12_7();
 
@@ -83,6 +89,9 @@ elseif num == 3
 
     k = 1;
     p = 20;
+
+    fprintf("\nSolving 12-spoke 7-ring web problem\n")
+    fprintf("This will probably take a few seconds\n\n")
 elseif num == 4
     [T,~,~,nodes,edges] = spider1();
 
@@ -91,6 +100,9 @@ elseif num == 4
 
     k = 1;
     p = 25;
+
+    fprintf("\nSolving net-caster web problem\n")
+    fprintf("This will probably take less than a second\n\n")
 elseif num == 5
     [T,~,~,nodes,edges] = spider2();
 
@@ -99,6 +111,9 @@ elseif num == 5
 
     k = 1;
     p = 10;
+
+    fprintf("\nSolving orb-weaver web problem\n")
+    fprintf("This will probably take a few minutes\n\n")
 else
     error("Input should be an integer 1-5");
 end
