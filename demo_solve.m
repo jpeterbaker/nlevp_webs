@@ -4,8 +4,8 @@ function ew = demo_solve(num)
 % Demonstrates use of the basic integration solver, basic_solver.m,
 % using a selection of the vibrating string problems in this package.
 %
-% The selected string network will be drawn in a figure along with
-% some of its eigenvalues and the (predetermined) contour used to calculate them.
+% The selected string network will be drawn in a figure along with some of its
+% eigenvalues and the (predetermined) contour used to calculate them.
 %
 % The eigenvalues tend to be inaccurate if the contour is too large or passes
 % too near an eigenvalue. Eigenvalues that lie near but outside the contour 
