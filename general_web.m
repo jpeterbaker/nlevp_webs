@@ -38,7 +38,7 @@ function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
 %         same as providing repamt(c(:)',ne,1)
 %     4) c is a scalar
 %         specifies the same damping for all strings in all directions
-%         same as providing repamt(c,ne,2)
+%         same as providing c*ones(ne,2)
 %     If c is a 2-vector and ne==2, then (2) is used if c is a column vector,
 %     and (3) is used if c is a row vector
 %     (default 0)
@@ -118,24 +118,27 @@ end
 
 if numel(c) == 1
     % Case 4
-    % Nothing to do
+    c = c*ones(ne,2);
 elseif numel(c) == 2
-    if ne ~= 2
-        % Case 2
-        % Just make sure c is a row vector
-        c = c(:).';
+    if ne == 2 && size(c,1)==2
+        % The case is ambiguous (Case 2 or 3) since ne == numel(c) == 2
+        % But c is a column, which suggests Case 2:
+        % Equal damping for every direction specified differently for the strings
+        c = repmat(c(:),2,1);
+    else
+        % Either ne is not 2 or c is a row
+        % Both conditions suggest Case 3:
+        % Equal damping for the strings specified differently for each direction
+        c = repmat(c(:).',ne,1);
     end
-    % If ne == 2, cases 2 and 3 are both handled correctly by bsxfun in build_mat
 elseif numel(c) == ne
     % Case 2
-    % Just make sure c is a column vector
-    c = c(:);
+    c = repmat(c(:),2,1);
 elseif all(size(c) == [ne,2])
     % Case 1
     % Nothing to do
 else
-    % Size of c not understood
-    error(sprintf('Damping c should be ne x 2 (to specify longitudinal and transverse damping for each string),\nor 1 x 2 (to specify longitudinal and transverse damping for all strings)\nor scalar (to specify same damping for all strings and directions)'));
+    error('Shape of damping c not understood')
 end
 
 rho = rho(:);
@@ -154,11 +157,13 @@ gamma = [ k.*s , k.*(s-1) ];
 T = @build_mat;
 
 function M = build_mat(lambda)
-g = -bsxfun( @plus , lambda^2*rho , lambda*c );
-G = sqrt(g);
+G = sqrt( -bsxfun( @plus , lambda^2*rho , lambda*c ) );
+% pq     = G/sqrt(gamma) is argument to trig functions
+% Ggamma = G*sqrt(gamma) is coefficient of trig functions in Y' calculation
 pq = bsxfun(@times,L,G) ./ sqrt(gamma);
 p = sin(pq);
 q = cos(pq);
+Ggamma = G.*sqrt(gamma);
 
 M = zeros(2*d*ne);
 % First unused row
@@ -177,6 +182,7 @@ F = numel(Fi);
 for i = Fi
     % String i is connected to the frame
     % so X and Y are  0 on this end
+    % w is orientation "weight"
     % w=-1 if tail is connected to the frame, w=1 for head
     w = E(1,i);
     % First column associated with a coefficient for string i
@@ -211,6 +217,7 @@ for u=2:nv
     % First neighbor of u
     i1 = Nu(1);
     % Figure out position of string i1 at u
+    % w is orientation "weight"
     w = E(u,i1);
     % yi1 will have the coefficients that would go in the matrix
     % if the string were horizontal.
@@ -229,7 +236,8 @@ for u=2:nv
         % Node is at the head (x=L), so terms are already computed in p and q
         % First eig used for first direction, second eig for all others
         % If d=2, the result is:
-        % yi1 = [ p(i1,1) , q(i1,1) , 0 , 0 ; 0 , 0 , p(i1,2) , q(i1,2) ];
+        % yi1 = [ p(i1,1) , q(i1,1) ,       0 ,       0 ;
+        %               0 ,       0 , p(i1,2) , q(i1,2) ];
         yi1(1,1:2) = [p(i1,1),q(i1,1)];
         for j=2:d
             yi1(j,2*j-1:2*j) = [p(i1,2),q(i1,2)];
@@ -277,36 +285,36 @@ end
 %     a factor of sqrt( ( lambda^2*rho + lambda*c )*gamma ) appears
 %         (due to derivative and multiplication by gamma matrix)
 %
-% The forces are H*dX but it's more convenient to write that as
-%    TV*gamma*dY
-% The inner loop calculates matrix entries corresponding to gamma*dY (Lyip)
-% and then pre-multiplies by TV
+% The forces are H*X' (HXp) but it's more convenient to write that as
+%    TV*gamma*Y'
+% The inner loop calculates matrix entries corresponding to gamma*Y' (gYp)
+% and then pre-multiplies by TV to calculate HXp
 for u=2:nv
     % Edge-neighborhood of node u
     Nu = find(E(u,:));
 
     % Y_i prime (derivative)
-    Lyip = zeros(d,2*d);
+    gYp = zeros(d,2*d);
     for i=Nu(1:end)
+        % w is orientation "weight"
         w = E(u,i);
-        % This term will be used repeatedly
         if w == -1
-            Lyip(1,1:2) = [ sqrt(G(i)*gamma(i,1)) , 0 ];
+            gYp(1,1:2) = [ Ggamma(i,1) , 0 ];
             for j=2:d
-                Lyip(j,2*j-1:2*j) = [ sqrt(G(i)*gamma(i,2)) , 0 ];
+                gYp(j,2*j-1:2*j) = [ Ggamma(i,2) , 0 ];
             end
         else
-            Lyip(1,1:2) = sqrt(G(i)*gamma(i,1))*[q(i,1),-p(i,1)];
+            gYp(1,1:2) = Ggamma(i,1)*[q(i,1),-p(i,1)];
             for j=2:d
-                Lyip(j,2*j-1:2*j) = sqrt(G(i)*gamma(i,2))*[q(i,2),-p(i,2)];
+                gYp(j,2*j-1:2*j) = Ggamma(i,2)*[q(i,2),-p(i,2)];
             end
         end
-        Hxip = TV(:,:,i)*Lyip;
+        HXp = TV(:,:,i)*gYp;
 
         col0i = coeff_index(1,1,i);
         % Factor of -w because derivative refers to different directions
         % depending on orientation
-        M(row0:row0+d-1,col0i :col0i +2*d-1) = -w*Hxip;
+        M(row0:row0+d-1,col0i :col0i +2*d-1) = -w*HXp;
     end
     row0 = row0 + d;
 end

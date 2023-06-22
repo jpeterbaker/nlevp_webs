@@ -23,6 +23,10 @@ function [B,new_edges,vs,L] = incidence_vectors(nodes,edges)
 %              -1 if node i is the tail of edge j
 %               0 otherwise
 %
+% new_edges is an (nv-nf) x 2 matrix of node indices
+%     It is comparable to the original edges matrix except that
+%     the anchored ends of strings have been combined into the node with index 1
+%
 % vs is an n x ne matrix of edge orientations
 %     vs(:,i) is a unit vector in the direction from the tail to the head of edge i
 %
