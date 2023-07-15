@@ -1,5 +1,5 @@
-function ew = demo_solve(num)
-%function ew = demo_solve(num)
+function [ew,T] = demo_solve(num)
+%function [ew,T] = demo_solve(num)
 %
 % Demonstrates use of the basic integration solver, basic_solver.m,
 % using a selection of the vibrating string problems in this package.
@@ -16,18 +16,20 @@ function ew = demo_solve(num)
 % INPUT
 %
 % num is a problem selector
-% 1) tritare (Y-shaped string)
-% 2) regweb_5_4 (prototypical web with 5 spokes, 4 rings)
-% 3) regweb_12_7 (prototypical web with 12 spokes, 7 rings)
-% 4) spider1 (Deinopis web)
-% 5) spider2 (Orb weaver web)
-%
-% If num is not provided as a parameter,
-% user is prompted to enter it manually.
+%     1) tritare (Y-shaped string)
+%     2) regweb_5_4 (prototypical web with 5 spokes, 4 rings)
+%     3) regweb_12_7 (prototypical web with 12 spokes, 7 rings)
+%     4) spider1 (Deinopis web)
+%     5) spider2 (Orb weaver web)
+%    
+%     If num is not provided as a parameter,
+%     user is prompted to enter it manually.
 %
 % OUTPUT
 %
 % ew is a vector of the calculated eigenvalues
+%
+% T is a matrix-valued function representing the NLEVP for the example problem
 % 
 
 % by Jonathan Baker
@@ -67,26 +69,26 @@ if num == 1
 
     % Establish extent of elliptical contour
     xlo = -0.5; xhi =  0.5;
-    ylo =  1.0; yhi = 10.0;
+    ylo =  1.0; yhi =  6.0;
 
     % Number of Hankel moments
     k = 3;
     % Number of probing directions
-    p = 10;
+    p = 6;
 
     fprintf("\nSolving tritare problem\n")
-    fprintf("This will probably take less than a second\n\n")
+    fprintf("This should only take a second\n\n")
 elseif num == 2
     [T,~,~,nodes,edges] = regweb_5_4();
 
     xlo = -0.1; xhi = 0.1;
     ylo =  1.0; yhi = 4.6;
 
-    k = 1;
-    p = 30;
+    k = 2;
+    p = 25;
 
     fprintf("\nSolving 5-spoke 4-ring web problem\n")
-    fprintf("This will probably take less than a second\n\n")
+    fprintf("This should only take a second\n\n")
 elseif num == 3
     [T,~,~,nodes,edges] = regweb_12_7();
 
@@ -94,7 +96,7 @@ elseif num == 3
     ylo =  1.0; yhi = 5.0;
 
     k = 1;
-    p = 20;
+    p = 50;
 
     fprintf("\nSolving 12-spoke 7-ring web problem\n")
     fprintf("This will probably take a few seconds\n\n")
@@ -108,12 +110,12 @@ elseif num == 4
     p = 25;
 
     fprintf("\nSolving net-caster web problem\n")
-    fprintf("This will probably take less than a second\n\n")
+    fprintf("This should only take a second\n\n")
 elseif num == 5
     [T,~,~,nodes,edges] = spider2();
 
     xlo = -0.005; xhi = 0.005;
-    ylo =  0.001; yhi = 0.009;
+    ylo =  0.02;  yhi = 0.1;
 
     k = 1;
     p = 10;
@@ -146,6 +148,7 @@ ew = basic_solver(T,z,w,p,k);
 % Plot the contour and eigenvalues %
 %----------------------------------%
 figure(10)
+clf
 subplot(1,2,1)
 hold on
 
