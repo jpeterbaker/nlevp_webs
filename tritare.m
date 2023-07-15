@@ -1,12 +1,20 @@
-function [T,TV,gamma,nodes,edges,ev] = tritare()
-%function [T,TV,gamma,nodes,edges,ev] = tritare()
+function [T,TV,gamma,nodes,edges] = tritare(theta)
+%function [T,TV,gamma,nodes,edges] = tritare(theta)
 %
-% Produces an NLEVP corresponding to planar modal vibrations of a 3-string or "tritare"
+% Produces an NLEVP corresponding to planar modal vibrations
+% of a Y-shaped "3-string" or "tritare"
 %
-% For this problem
-%    Nodes        nv = 4
-%    Strings      ne = 3
-%    Dimensions   d  = 2
+% For each string, Hooke's constant (k) and linear density (rho) are 1.
+% Tension in each "arm" has magnitude 1.
+% Tension in the "stem" is selected to produce static equilibrium
+% when the arms form the angle theta.
+%
+% INPUT
+%     theta: angle between the "arm" strings.
+%         theta should be in the interval [0,pi).
+%             (default value 2*pi/3)
+%         The "stem" string lies opposite the bisector of this angle
+%         so that it lies on a line of symmetry.
 %
 % OUTPUTS
 % 
@@ -49,59 +57,27 @@ function [T,TV,gamma,nodes,edges,ev] = tritare()
 %     edges(i,:) contains the indices of the two nodes connected by string i
 %     ne is the number of edges
 %
-%
-% ev is a 24-vector of the smallest positive frequencies (on imaginary axis)
-%
-s2 = 1/sqrt(2);
-nodes = [   0,  0
-           -1,  0
-           s2, s2
-           s2,-s2];
+
+if nargin < 1
+    theta = 2*pi/3;
+end
+
+% Magnitude of tension in arms (strings 2 and 3)
+T2 = 1;
+% Magnitude of tension in stem (string 1)
+T1 = 2*cos(theta/2);
+% Stretched string lengths (each has relaxed length 1 and stretch factor T+1)
+L1 = T1+1;
+L2 = T2+1;
+
+nodes = [  0              ,   0
+         -L1              ,   0
+          L2*cos(theta/2) ,  L2*sin(theta/2)
+          L2*cos(theta/2) , -L2*sin(theta/2)];
 
 edges = [2,1
          3,1
          4,1];
 
 [T,TV,gamma] = general_web(nodes,edges);
-
-% Natural frequencies are solutions of
-%
-% (1)   sin(x) = 0
-%
-% (2)   sin(x/sqrt(2)) = 0
-%
-% (3)   tan(x) + sqrt(2)*tan(x/sqrt(2)) = 0
-%    or equivalently
-%       sin(x)*cos(x/sqrt(2)) + sqrt(2)*sin(x/sqrt(2))*cos(x) = 0
-%
-% (4)   2*sqrt(2)*tan(x) + tan(x/sqrt(2)) = 0
-%    or equivalently
-%       2*sqrt(2)*sin(x)*cos(x/sqrt(2)) + cos(x)*sin(x/sqrt(2)) = 0
-% 
-% These solutions are not difficult to find with numerical root-finding methods
-
-ev = [1.78993037359553312790910971176
-      1.99658732056910586526458512505
-      3.14159265358979323846264338328
-      3.43723396871777041008382193164
-      3.77073144615781997855778892843
-      4.44288293815836624701588099006
-      5.41991645432706565399912106673
-      5.80985767635318626426947322806
-      6.28318530717958647692528676656
-      7.10959048557161358103777053585
-      7.44389306692523896182785166003
-      8.88576587631673249403176198012
-      9.15688541405701741654222854053
-      9.31460464998877656090308499856
-      9.42477796076937971538793014984
-      11.0327967546384344713384388967
-      11.0699562440765798653039052732
-      12.5663706143591729538505735331
-      12.7256215934544782848147064046
-      12.9429962493987284344002807234
-      13.3286488144750987410476429702
-      14.6305702085998011895379732584
-      14.9980859062085563610159486292
-      15.7079632679489661923132169164]*1i;
 
