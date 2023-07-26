@@ -1,5 +1,5 @@
-function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
-%function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
+function [T,TV,gam] = general_web(nodes,edges,rho,k,s,c)
+%function [T,TV,gam] = general_web(nodes,edges,rho,k,s,c)
 %
 % Represent a vibrating network of elastic strings as a nonlinear eigenvalue problem
 %
@@ -70,9 +70,9 @@ function [T,TV,gamma] = general_web(nodes,edges,rho,k,s,c)
 %     This is needed for understanding mode shapes
 %     TV(:,i,j) is the direction of "dimension i" for string j
 %
-% gamma is an ne x 2 array of eigenvalues of the wave operator
-%     gamma(i,1) is the eigenvalue for the longitudinal component of string i
-%     gamma(i,2) for j=2 is the eigenvalue for all transverse directions of string i
+% gam is an ne x 2 array of eigenvalues of the wave operator
+%     gam(i,1) is the eigenvalue for the longitudinal component of string i
+%     gam(i,2) for j=2 is the eigenvalue for all transverse directions of string i
 
 [ne,two] = size(edges);
 if two~=2
@@ -145,29 +145,54 @@ rho = rho(:);
 k = k(:);
 s = s(:);
 
-TV = zeros(d,d,ne);
-for i=1:ne
-    % First column is string direction
-    % Other columns are any orthonormal basis for the rest of R^d
-    [TV(:,:,i),~] = svd(vs(:,i));
+TV = zeros(d,d,ne,class(nodes));
+if class(nodes) ~= "sym"
+    for i=1:ne
+        % First column is string direction
+        % Other columns are any orthonormal basis for the rest of R^d
+        [TV(:,:,i),~] = svd(vs(:,i));
+    end
+else
+    if d > 2
+        % Possible improvement: produce symbolic orthogonal basis
+        % for more dimensions
+        error('Symbolic variables not supported for d>2 dimensions')
+    end
+    for i=1:ne
+        % First column is string direction
+        % Other columns are any orthonormal basis for the rest of R^d
+        TV(:,1,i) = vs(:,i);
+        if d>1
+            TV(:,2,i) = [vs(2,i);-vs(1,i)];
+        end
+    end
 end
 
-gamma = [ k.*s , k.*(s-1) ];
+gam = [ k.*s , k.*(s-1) ];
 
 T = @build_mat;
 
 function M = build_mat(lambda)
-G = sqrt( -bsxfun( @plus , lambda^2*rho , lambda*c ) );
-% pq     = G/sqrt(gamma) is argument to trig functions
-% Ggamma = G*sqrt(gamma) is coefficient of trig functions in Y' calculation
-pq = bsxfun(@times,L,G) ./ sqrt(gamma);
-p = sin(pq);
-q = cos(pq);
-Ggamma = G.*sqrt(gamma);
+% bsxfun is needed by older versions of MATLAB,
+% but it does not work on symbolic variables
+if class(lambda) == "sym"
+    G = sqrt( -(lambda^2*rho + lambda*c ) );
+    pq = (L.*G) ./ sqrt(gam);
+else
+    G = sqrt( -bsxfun( @plus , lambda^2*rho , lambda*c ) );
+    pq = bsxfun(@times,L,G) ./ sqrt(gam);
+end
 
-M = zeros(2*d*ne);
+M = zeros(2*d*ne,class(lambda));
+
 % First unused row
 row0 = 1;
+
+% pq     = G/sqrt(gam) is argument to trig functions
+% Ggam = G*sqrt(gam) is coefficient of trig functions in Y' calculation
+p = sin(pq);
+q = cos(pq);
+Ggam = G.*sqrt(gam);
 
 % Say frame has F string connections
 % First d*F rows are Dirichlet conditions on the frame
@@ -224,7 +249,7 @@ for u=2:nv
     % TV(:,:,i1) has the correct transformation to standard coordinates
     % In other words, Y_i1(u) = yi1 * [A_(i1,1) ; B_(i1,1) ; ... ; B_(i1,d) ]
     % and X_i1(u) = TV(:,:,i1)*Y_i1;
-    yi1 = zeros(d,2*d);
+    yi1 = zeros(d,2*d,class(lambda));
     if w == -1
         % Node is at the tail (x=0), so sin terms are zero and cos terms are 1
         % If d=2, the result is:
@@ -249,7 +274,7 @@ for u=2:nv
 
     % Construction of yi is just like for yi1
     % except that, since yi variable is reused, 0 must be written in w = -1 case
-    yi = zeros(d,2*d);
+    yi = zeros(d,2*d,class(lambda));
     for i=Nu(2:end)
         w = E(u,i);
         if w == -1
@@ -282,31 +307,31 @@ end
 % but, for each node
 %     only d rows are used (representing sum of all forces in each of d dimensions)
 %     sin and cos (p and q) terms are modified (due to derivative)
-%     a factor of sqrt( ( lambda^2*rho + lambda*c )*gamma ) appears
-%         (due to derivative and multiplication by gamma matrix)
+%     a factor of sqrt( ( lambda^2*rho + lambda*c )*gam ) appears
+%         (due to derivative and multiplication by gam matrix)
 %
 % The forces are H*X' (HXp) but it's more convenient to write that as
-%    TV*gamma*Y'
-% The inner loop calculates matrix entries corresponding to gamma*Y' (gYp)
+%    TV*gam*Y'
+% The inner loop calculates matrix entries corresponding to gam*Y' (gYp)
 % and then pre-multiplies by TV to calculate HXp
 for u=2:nv
     % Edge-neighborhood of node u
     Nu = find(E(u,:));
 
     % Y_i prime (derivative)
-    gYp = zeros(d,2*d);
+    gYp = zeros(d,2*d,class(lambda));
     for i=Nu(1:end)
         % w is orientation "weight"
         w = E(u,i);
         if w == -1
-            gYp(1,1:2) = [ Ggamma(i,1) , 0 ];
+            gYp(1,1:2) = [ Ggam(i,1) , 0 ];
             for j=2:d
-                gYp(j,2*j-1:2*j) = [ Ggamma(i,2) , 0 ];
+                gYp(j,2*j-1:2*j) = [ Ggam(i,2) , 0 ];
             end
         else
-            gYp(1,1:2) = Ggamma(i,1)*[q(i,1),-p(i,1)];
+            gYp(1,1:2) = Ggam(i,1)*[q(i,1),-p(i,1)];
             for j=2:d
-                gYp(j,2*j-1:2*j) = Ggamma(i,2)*[q(i,2),-p(i,2)];
+                gYp(j,2*j-1:2*j) = Ggam(i,2)*[q(i,2),-p(i,2)];
             end
         end
         HXp = TV(:,:,i)*gYp;

@@ -58,8 +58,8 @@ end
 % Fill a sparse matrix all at once with lists of indices and entries
 B = sparse([new_edges(:,1);new_edges(:,2)],[1:ne,1:ne]',[-ones(ne,1);ones(ne,1)]);
 
-L = zeros(ne,1);
-vs = zeros(n,ne);
+L = zeros(ne,1,class(nodes));
+vs = zeros(n,ne,class(nodes));
 for i=1:ne
 	tail = nodes(edges(i,1),:);
 	head = nodes(edges(i,2),:);

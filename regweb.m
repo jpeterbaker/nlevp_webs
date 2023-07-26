@@ -1,5 +1,5 @@
-function [T,TV,gamma,nodes,edges] = regweb(spokes,rings,d)
-%function [T,TV,gamma,nodes,edges] = regweb(spokes,rings,d)
+function [T,TV,gamma,nodes,edges] = regweb(ns,nr,d)
+%function [T,TV,gamma,nodes,edges] = regweb(ns,nr,d)
 %
 % Represent modal vibrations of a network of elastic strings as a nonlinear eigenvalue problem.
 % The network is a "spider web" with regularly spaced spokes and rings.
@@ -9,14 +9,14 @@ function [T,TV,gamma,nodes,edges] = regweb(spokes,rings,d)
 %    and anchored spokes (on the perimeter) have tension 2 (s=3).
 %
 % For this problem
-%    Nodes        nv = spokes*(rings+1)+1
-%    Strings      ne = spokes*(2*rings+1)
+%    Nodes        nv = ns*(nr+1)+1
+%    Strings      ne = ns*(2*nr+1)
 %
 % INPUTS
 %
-% spokes is the number of radial spokes in the web
+% ns is the number of radial spokes in the web
 % 
-% rings is the number of concentric polygonal rings in the web
+% nr is the number of concentric polygonal rings in the web
 %
 % d is the number of spatial dimensions for the web to occupy (2 or 3)
 %     (default d=2)
@@ -39,7 +39,7 @@ if nargin<3 || isempty(d)
     d = 2;
 end
 
-[nodes,edges] = regweb_graph(spokes,rings,d);
+[nodes,edges] = regweb_graph(ns,nr,d);
 
 rho = 1;
 k   = 1;
@@ -49,23 +49,23 @@ k   = 1;
 %--------------------------------------%
 
 % Inner angle between spoke and rings
-theta = (0.5-1/spokes)*pi;
+theta = (0.5-1/ns)*pi;
 % Tension in each ring (scalar)
-r_tension = sec(theta)/(2*rings);
+r_tension = sec(theta)/(2*nr);
 % s_tension(i) is spoke tension between rings (i-1) and i
-if rings==0
+if nr==0
     s_tension = 1;
 else
-    s_tension = linspace(1,2,rings+1);
+    s_tension = linspace(1,2,nr+1);
 end
-% Now replicate since there are (spokes) spoke-strings between consecutive rings
-s_stretch = reshape(repmat(1+s_tension/k,spokes,1),[],1);
+% Now replicate since there are (ns) spoke-strings between consecutive rings
+s_stretch = reshape(repmat(1+s_tension/k,ns,1),[],1);
 
 % Stretch factor s for all strings in the order provided by regweb_graph
 % tension = k*(s-1)
 s = [...
     s_stretch; ... % Spokes
-    repmat(1+r_tension/k,rings*spokes,1)... % Rings
+    repmat(1+r_tension/k,nr*ns,1)... % Rings
 ];
 
 [T,TV,gamma] = general_web(nodes,edges,rho,k,s);
