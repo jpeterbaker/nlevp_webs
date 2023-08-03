@@ -1,4 +1,4 @@
-function [T,TV,gamma,nodes,edges] = regweb_12_7(d)
+function [T,TV,gamma,nodes,edges,ew] = regweb_12_7(d)
 %function [T,TV,gamma,nodes,edges] = regweb_12_7(d)
 %
 % Represent modal vibrations of a network of elastic strings as a nonlinear eigenvalue problem
@@ -31,4 +31,29 @@ if nargin<1 || isempty(d)
 end
 [T,TV,gamma,nodes,edges] = regweb(12,7,d);
 
+ew = 1i*[
+    1.554718968135
+    1.554718968135
+    2.392757029983
+    2.733524641834
+    2.733524641834
+    2.972047754465
+    3.198512077458
+    3.198512077458
+    3.286656934694
+    3.286656934694
+    3.494873518374
+    3.494873518374
+    3.526354924854
+    3.526354924854
+    3.553608948641
+    3.553608948641
+    3.571196078490
+    3.597944965839
+    3.597944965839
+    3.624703655060
+    3.658276748550
+    3.658276748550
+    3.741538406894
+    3.741538406894];
 

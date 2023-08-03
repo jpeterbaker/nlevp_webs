@@ -1,4 +1,4 @@
-function [T,TV,gamma,nodes,edges] = spider2(d)
+function [T,TV,gamma,nodes,edges,ew] = spider2(d)
 %function [T,TV,gamma,nodes,edges] = spider2(d)
 %
 % Orb weaver web model
@@ -28,4 +28,30 @@ if d == 3
 end
 
 [T,TV,gamma] = general_web(nodes,edges);
+
+ew = 1i*[
+    0.02683803
+    0.02872040
+    0.06095035
+    0.06973589
+    0.07226500
+    0.07949915
+    0.09029340
+    0.09669386
+    0.10341368
+    0.10521216
+    0.11192470
+    0.11679917
+    0.11729910
+    0.12723586
+    0.13377063
+    0.13767223
+    0.13956348
+    0.14561710
+    0.14608491
+    0.15123553
+    0.15362060
+    0.15819261
+    0.16258235
+    0.16368702];
 

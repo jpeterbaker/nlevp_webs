@@ -16,11 +16,12 @@ function [ew,T] = demo_solve(num)
 % INPUT
 %
 % num is a problem selector
-%     1) tritare (Y-shaped string)
-%     2) regweb_5_4 (prototypical web with 5 spokes, 4 rings)
-%     3) regweb_12_7 (prototypical web with 12 spokes, 7 rings)
-%     4) spider1 (Deinopis web)
-%     5) spider2 (Orb weaver web)
+%     1) symmetric three-string (equal angles between strings)
+%     2) square three-string (right angle between two strings)
+%     3) regweb_5_4 (prototypical web with 5 spokes, 4 rings)
+%     4) regweb_12_7 (prototypical web with 12 spokes, 7 rings)
+%     5) spider1 (Deinopis web)
+%     6) spider2 (Orb weaver web)
 %    
 %     If num is not provided as a parameter,
 %     user is prompted to enter it manually.
@@ -42,11 +43,12 @@ if nargin < 1
     newline = sprintf('\n');
     helpstr = join([
         "Enter a problem number to continue:",
-        "1) tritare (Y-shaped string)",
-        "2) regweb_5_4 (prototypical web with 5 spokes, 4 rings)",
-        "3) regweb_12_7 (prototypical web with 12 spokes, 7 rings)",
-        "4) spider1 (Deinopis web)",
-        "5) spider2 (Orb weaver web)",
+        "1) symmetric three-string (equal angles between strings)",
+        "2) square three-string (right angle between two strings)",
+        "3) regweb_5_4 (prototypical web with 5 spokes, 4 rings)",
+        "4) regweb_12_7 (prototypical web with 12 spokes, 7 rings)",
+        "5) spider1 (Deinopis web)",
+        "6) spider2 (Orb weaver web)",
         ""],...
     newline...
     );
@@ -54,64 +56,74 @@ if nargin < 1
     num = str2double(num);
 end
 
-%----------------------------%
-% Get selected NLEVP problem %
-% and good predetermined     %
-% solver parameters          %
-%----------------------------%
+%-----------------------------------%
+% Get selected NLEVP problem        %
+% and preselected solver parameters %
+%-----------------------------------%
 
 % Number of quadrature points
 N = 100;
 
 if num == 1
     % The NLEVP function
-    [T,~,~,nodes,edges] = tritare();
+    [T,~,~,nodes,edges] = tritare(2*pi/3);
 
     % Establish extent of elliptical contour
     xlo = -0.5; xhi =  0.5;
-    ylo =  1.0; yhi =  6.0;
+    ylo =  0.5; yhi =  6.0;
 
     % Number of Hankel moments
     k = 3;
     % Number of probing directions
     p = 6;
 
-    fprintf("\nSolving tritare problem\n")
+    fprintf("\nSolving symmetric three-string problem\n")
     fprintf("This should only take a second\n\n")
 elseif num == 2
+    [T,~,~,nodes,edges] = tritare(pi/2);
+
+    xlo = -0.5; xhi =  0.5;
+    ylo =  0.5; yhi =  6.0;
+
+    k = 3;
+    p = 8;
+
+    fprintf("\nSolving square three-string problem\n")
+    fprintf("This should only take a second\n\n")
+elseif num == 3
     [T,~,~,nodes,edges] = regweb_5_4();
 
     xlo = -0.1; xhi = 0.1;
-    ylo =  1.0; yhi = 4.6;
+    ylo =  1.0; yhi = 3.22;
 
     k = 2;
-    p = 25;
+    p = 13;
 
     fprintf("\nSolving 5-spoke 4-ring web problem\n")
-    fprintf("This should only take a second\n\n")
-elseif num == 3
+    fprintf("This should only take a few seconds\n\n")
+elseif num == 4
     [T,~,~,nodes,edges] = regweb_12_7();
 
     xlo = -0.1; xhi = 0.1;
-    ylo =  1.0; yhi = 5.0;
+    ylo =  1.0; yhi = 3.75;
 
-    k = 1;
-    p = 50;
+    k = 2;
+    p = 13;
 
     fprintf("\nSolving 12-spoke 7-ring web problem\n")
     fprintf("This will probably take a few seconds\n\n")
-elseif num == 4
+elseif num == 5
     [T,~,~,nodes,edges] = spider1();
 
-    xlo = -0.005; xhi = 0.005;
+    xlo = -0.002; xhi = 0.002;
     ylo =  0.001; yhi = 0.0203;
 
     k = 1;
-    p = 25;
+    p = 28;
 
     fprintf("\nSolving net-caster web problem\n")
     fprintf("This should only take a second\n\n")
-elseif num == 5
+elseif num == 6
     [T,~,~,nodes,edges] = spider2();
 
     xlo = -0.005; xhi = 0.005;
@@ -121,9 +133,9 @@ elseif num == 5
     p = 10;
 
     fprintf("\nSolving orb-weaver web problem\n")
-    fprintf("This will probably take a few minutes\n\n")
+    fprintf("This will probably take a several minutes\n\n")
 else
-    error("Input should be an integer 1-5");
+    error("Input should be an integer 1-6");
 end
 
 %------------------------------------------------%
@@ -143,11 +155,13 @@ w = 2*pi/N*(a*-sin(theta) + 1i*b*cos(theta));
 % Use NLEVP solver %
 %------------------%
 ew = basic_solver(T,z,w,p,k);
+% Sort by imaginary part for convenience
+[~,order] = sort(imag(ew));
+ew = ew(order);
 
 %----------------------------------%
 % Plot the contour and eigenvalues %
 %----------------------------------%
-figure(10)
 clf
 subplot(1,2,1)
 hold on
