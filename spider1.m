@@ -1,5 +1,5 @@
 function [T,TV,gamma,nodes,edges,ew] = spider1(d)
-%function [T,TV,gamma,nodes,edges] = spider1(d)
+%function [T,TV,gamma,nodes,edges,ew] = spider1(d)
 %
 % Deinopis web model
 % 
@@ -14,6 +14,9 @@ function [T,TV,gamma,nodes,edges,ew] = spider1(d)
 % OUTPUTS
 % 
 % See general_web.m for an explanation of T,TV,gamma
+%
+% ew is a vector of the first 24 eigenvalues
+%     ONLY AVAILABLE IF d IS 2
 %
 
 if nargin<3 || isempty(d)

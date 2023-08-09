@@ -2,7 +2,6 @@ function ew = basic_solver(T,z,w,p,r,tol)
 %function ew = basic_solver(T,z,w,p,r,tol)
 %
 % Basic contour integration solver based on Beyn's algorithm
-%
 % 
 % INPUTS
 %
@@ -30,18 +29,17 @@ function ew = basic_solver(T,z,w,p,r,tol)
 % ew is a vector of approximate eigenvalues of T that lie in the contour
 % defined by z.
 %    ew is likely to be inaccurate if
-%       > p or r is too small
-%       > the contour points z and weights w do not correspond to a good
+%       * p or r is too small
+%       * the contour points z and weights w do not correspond to a good
 %         quadrature method
-%       > the contour points z are too coarse (with too few points)
-%       > the contour is too large (with points that are far away from each
+%       * the contour points z are too coarse (with too few points)
+%       * the contour is too large (with points that are far away from each
 %         other)
-%       > the contour passes very close to an eigenvalue (inside or outside)
+%       * the contour passes very close to an eigenvalue (inside or outside)
 %
 % NOTE
-% A seed is used to generate "random" probing directions consistently across
-% function runs. This could affect other work that uses MATLAB's random number
-% generator.
+% A seed is used to consistently generate the same "random" probing directions.
+% This could affect other work that uses MATLAB's random number generator.
 %
 
 % by Jonathan Baker

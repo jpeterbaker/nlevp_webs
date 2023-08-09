@@ -1,7 +1,8 @@
 function [T,TV,gam] = general_web(nodes,edges,rho,k,s,c)
 %function [T,TV,gam] = general_web(nodes,edges,rho,k,s,c)
 %
-% Represent a vibrating network of elastic strings as a nonlinear eigenvalue problem
+% Represent a vibrating network of elastic strings as a nonlinear eigenvalue problem.
+% Nodes of degree 1 are treated as anchors.
 %
 % INPUTS
 %

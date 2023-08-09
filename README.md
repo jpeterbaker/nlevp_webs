@@ -39,16 +39,15 @@ The primary purpose of this project is to provide interesting problem examples,
 *not* to provide solution methods or provide realistic
 natural frequencies of actual spiderwebs.
 
-## Getting started
 
-### Setup
+## Setup
 
 1. Download the project 
-2. Update MatLab's working directory (or search path) to include the project directory
+2. Update MATLAB's working directory (or search path) to include the project directory
 3. Run `demo_tritare` to test your setup
    * A figure should display a wiggly Y-shape that is a modal vibration of a "tritare" string
 
-### First experiment
+## First experiment
 
 1. Modify `demo_tritare.m` to choose a different mode (choose a value of `j` from 1 to 24)
 2. Rerun `demo_tritare` to see the corresponding mode shape
@@ -64,7 +63,7 @@ A link will be provided when ready.
 
 ## Requirements
 
-This project runs in base MatLab without any additional packages needed.
+This project runs in base MATLAB without any additional packages needed.
 It was developed with versions 2020a and 2021b
 but is expected to work in much older versions.
 
